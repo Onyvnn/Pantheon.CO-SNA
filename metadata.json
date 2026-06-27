@@ -1,0 +1,6 @@
+{
+  "name": "Declaración SAG Móvil",
+  "description": "Formulario digital de declaración jurada SAG para turistas en fronteras terrestres de Chile.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
