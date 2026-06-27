@@ -23,6 +23,16 @@ export interface DeclaredItem {
   riskLevel: RiskLevel;
 }
 
+export interface Pet {
+  id: string;
+  species: 'dog' | 'cat' | 'other';
+  otherSpecies?: string;
+  name: string;
+  vaccines: string;
+  vetDocName?: string;
+  vetDocUrl?: string; // Data URL or placeholder for preview
+}
+
 export interface Declaration {
   id: string; // Folio e.g., SAG-2026-XXXXX
   fullName: string;
@@ -35,6 +45,8 @@ export interface Declaration {
   vehiclePlate?: string;
   hasProductsToDeclare: boolean;
   declaredItems: DeclaredItem[];
+  hasPets: boolean;
+  pets: Pet[];
   signatureDataUrl?: string; // Digital signature
   createdAt: string;
   status: 'draft' | 'submitted' | 'inspected';

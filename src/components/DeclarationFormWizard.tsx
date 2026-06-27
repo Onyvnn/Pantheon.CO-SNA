@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, MapPin, ClipboardList, CheckSquare, ChevronRight, ChevronLeft, Calendar, FileText, AlertOctagon, HelpCircle, AlertTriangle, ShieldCheck, Plus, Trash2 } from 'lucide-react';
-import { BorderCrossing, DeclaredItem, Declaration, RiskLevel } from '../types';
+import { User, MapPin, ClipboardList, CheckSquare, ChevronRight, ChevronLeft, Calendar, FileText, AlertOctagon, HelpCircle, AlertTriangle, ShieldCheck, Plus, Trash2, UploadCloud, Check } from 'lucide-react';
+import { BorderCrossing, DeclaredItem, Declaration, RiskLevel, Pet } from '../types';
 import { CHILE_BORDER_CROSSINGS, getRiskBadgeColor, getRiskIconColor } from '../data';
 import ProductSearch from './ProductSearch';
 
@@ -32,11 +32,109 @@ export default function DeclarationFormWizard({ onSubmit }: DeclarationFormWizar
   const [categoryAnimal, setCategoryAnimal] = useState(false);
   const [categoryChemical, setCategoryChemical] = useState(false);
 
-  // Step 4: Signature & Oath
+  // Step 4: Mascotas (Registro de Mascotas)
+  const [hasPets, setHasPets] = useState<boolean | null>(null);
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [petName, setPetName] = useState('');
+  const [petSpecies, setPetSpecies] = useState<'dog' | 'cat' | 'other'>('dog');
+  const [petOtherSpecies, setPetOtherSpecies] = useState('');
+  const [petVaccines, setPetVaccines] = useState('');
+  const [petVetDocName, setPetVetDocName] = useState('');
+  const [petVetDocUrl, setPetVetDocUrl] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Step 5: Signature & Oath
   const [acceptOath, setAcceptOath] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
+
+  // Pet Handlers
+  const handlePetVetDocUpload = (file: File) => {
+    setIsUploading(true);
+    setUploadProgress(10);
+    
+    // Simulate upload progress
+    const interval = setInterval(() => {
+      setUploadProgress((prev) => {
+        if (prev >= 90) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + 15;
+      });
+    }, 120);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setTimeout(() => {
+        setPetVetDocName(file.name);
+        setPetVetDocUrl(reader.result as string);
+        setIsUploading(false);
+      }, 700);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handlePetVetDocUpload(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleAddPet = () => {
+    if (!petName.trim()) {
+      setErrors((prev) => ({ ...prev, petName: 'Ingrese el nombre de la mascota.' }));
+      return;
+    }
+    if (petSpecies === 'other' && !petOtherSpecies.trim()) {
+      setErrors((prev) => ({ ...prev, petOtherSpecies: 'Especifique la especie de la mascota.' }));
+      return;
+    }
+    if (!petVaccines.trim()) {
+      setErrors((prev) => ({ ...prev, petVaccines: 'Especifique el tipo de vacunas (ej: Antirrábica).' }));
+      return;
+    }
+    if (!petVetDocName) {
+      setErrors((prev) => ({ ...prev, petVetDoc: 'Debe cargar el certificado sanitario/veterinario (PDF/JPG).' }));
+      return;
+    }
+
+    const newPet: Pet = {
+      id: `pet-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      name: petName,
+      species: petSpecies,
+      otherSpecies: petSpecies === 'other' ? petOtherSpecies : undefined,
+      vaccines: petVaccines,
+      vetDocName: petVetDocName,
+      vetDocUrl: petVetDocUrl,
+    };
+
+    setPets((prev) => [...prev, newPet]);
+    
+    // Reset form fields
+    setPetName('');
+    setPetSpecies('dog');
+    setPetOtherSpecies('');
+    setPetVaccines('');
+    setPetVetDocName('');
+    setPetVetDocUrl('');
+    setErrors({});
+  };
 
   // Auto-scrolling to top on step change for a mobile feel
   useEffect(() => {
@@ -67,7 +165,7 @@ export default function DeclarationFormWizard({ onSubmit }: DeclarationFormWizar
 
   // Setup canvas with guides on render
   useEffect(() => {
-    if (step === 4 && canvasRef.current) {
+    if (step === 5 && canvasRef.current) {
       const canvas = canvasRef.current;
       // Fit signature pad to physical display
       const rect = canvas.getBoundingClientRect();
@@ -207,6 +305,18 @@ export default function DeclarationFormWizard({ onSubmit }: DeclarationFormWizar
 
   const validateStep4 = () => {
     const newErrors: Record<string, string> = {};
+    if (hasPets === null) {
+      newErrors.hasPets = 'Debe indicar si viaja con mascotas.';
+    } else if (hasPets === true && pets.length === 0) {
+      newErrors.pets = 'Por favor complete el registro de su mascota y presione "Guardar y Registrar Mascota" antes de continuar.';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateStep5 = () => {
+    const newErrors: Record<string, string> = {};
     if (!acceptOath) newErrors.acceptOath = 'Debe declarar bajo juramento para enviar.';
     if (!hasSignature) newErrors.signature = 'Debe firmar en el recuadro digital.';
 
@@ -219,6 +329,7 @@ export default function DeclarationFormWizard({ onSubmit }: DeclarationFormWizar
     if (step === 1 && validateStep1()) setStep(2);
     else if (step === 2 && validateStep2()) setStep(3);
     else if (step === 3 && validateStep3()) setStep(4);
+    else if (step === 4 && validateStep4()) setStep(5);
   };
 
   const handleBack = () => {
@@ -227,7 +338,7 @@ export default function DeclarationFormWizard({ onSubmit }: DeclarationFormWizar
   };
 
   const handleFinalSubmit = () => {
-    if (validateStep4()) {
+    if (validateStep5()) {
       const signatureDataUrl = canvasRef.current?.toDataURL();
       const newDeclaration: Declaration = {
         id: `SAG-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`,
@@ -241,6 +352,8 @@ export default function DeclarationFormWizard({ onSubmit }: DeclarationFormWizar
         vehiclePlate: transportType !== 'pedestrian' ? vehiclePlate.toUpperCase() : undefined,
         hasProductsToDeclare: hasProductsToDeclare === true,
         declaredItems: hasProductsToDeclare === true ? declaredItems : [],
+        hasPets: hasPets === true,
+        pets: hasPets === true ? pets : [],
         signatureDataUrl,
         createdAt: new Date().toISOString(),
         status: 'submitted',
@@ -253,7 +366,7 @@ export default function DeclarationFormWizard({ onSubmit }: DeclarationFormWizar
     <div id="wizard-container" className="w-full max-w-md mx-auto bg-slate-50/30 p-3 space-y-3">
       {/* Step Indicators */}
       <div className="flex items-center justify-between px-2.5 py-1.5 bg-white rounded-xl border border-slate-200/65 shadow-xs">
-        {[1, 2, 3, 4].map((num) => {
+        {[1, 2, 3, 4, 5].map((num) => {
           const isActive = step === num;
           const isCompleted = step > num;
           return (
@@ -271,11 +384,11 @@ export default function DeclarationFormWizard({ onSubmit }: DeclarationFormWizar
                   {isCompleted ? '✓' : num}
                 </div>
                 <span className={`text-[10px] font-bold ${isActive ? 'text-sag-dark' : 'text-slate-400 hidden sm:inline'}`}>
-                  {num === 1 ? 'Viajero' : num === 2 ? 'Ruta' : num === 3 ? 'Declarar' : 'Firma'}
+                  {num === 1 ? 'Viajero' : num === 2 ? 'Ruta' : num === 3 ? 'Declarar' : num === 4 ? 'Mascotas' : 'Firma'}
                 </span>
               </div>
-              {num < 4 && (
-                <div className={`h-0.5 w-3 transition-all duration-300 ${step > num ? 'bg-sag-green' : 'bg-slate-200'}`} />
+              {num < 5 && (
+                <div className={`h-0.5 w-2 transition-all duration-300 ${step > num ? 'bg-sag-green' : 'bg-slate-200'}`} />
               )}
             </React.Fragment>
           );
@@ -615,13 +728,361 @@ export default function DeclarationFormWizard({ onSubmit }: DeclarationFormWizar
         </div>
       )}
 
-      {/* STEP 4: Firma Digital y Juramento Legal */}
+      {/* STEP 4: Registro de Mascotas */}
       {step === 4 && (
         <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
           <div className="border-b border-slate-100 pb-2">
             <h2 className="text-sm font-extrabold text-sag-dark flex items-center gap-1.5 font-display">
+              <span className="text-base">🐾</span>
+              4. Registro de Mascotas (Perros/Gatos)
+            </h2>
+            <p className="text-[11px] text-slate-500 mt-0.5 leading-tight">
+              Debe registrar de forma obligatoria las mascotas que ingresan al país, adjuntando su certificado sanitario internacional.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {/* Toggle Yes/No */}
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-600">
+                ¿Viaja acompañado de mascotas (perros/gatos)? *
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHasPets(true);
+                    setErrors({});
+                  }}
+                  className={`py-2.5 px-3 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    hasPets === true
+                      ? 'bg-blue-50/50 border-sag-blue text-sag-dark shadow-xs'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className="text-sm">🐕</span> Sí, viajo con mascotas
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHasPets(false);
+                    setPets([]);
+                    setErrors({});
+                  }}
+                  className={`py-2.5 px-3 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    hasPets === false
+                      ? 'bg-blue-50/50 border-sag-blue text-sag-dark shadow-xs'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  🚫 No viajo con mascotas
+                </button>
+              </div>
+              {errors.hasPets && <p className="text-[10px] text-sag-red font-semibold">{errors.hasPets}</p>}
+            </div>
+
+            {hasPets === true && (
+              <div className="space-y-3.5 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                {/* Pet Registration Form Block */}
+                <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block border-b border-slate-200 pb-1">
+                    Registrar Nueva Mascota
+                  </span>
+
+                  {/* Name input */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-0.5">
+                      Nombre de la Mascota *
+                    </label>
+                    <input
+                      type="text"
+                      value={petName}
+                      onChange={(e) => {
+                        setPetName(e.target.value);
+                        setErrors((prev) => ({ ...prev, petName: '' }));
+                      }}
+                      placeholder="Ej: Max, Luna"
+                      className="w-full text-xs p-2 rounded-md border border-slate-300 focus:outline-none focus:ring-1 focus:ring-sag-blue focus:border-sag-blue bg-white"
+                    />
+                    {errors.petName && <p className="text-[10px] text-sag-red font-medium">{errors.petName}</p>}
+                  </div>
+
+                  {/* Species Input */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-0.5">
+                      Especie *
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['dog', 'cat', 'other'] as const).map((spec) => (
+                        <button
+                          key={spec}
+                          type="button"
+                          onClick={() => {
+                            setPetSpecies(spec);
+                            setErrors((prev) => ({ ...prev, petOtherSpecies: '' }));
+                          }}
+                          className={`py-1.5 px-2 rounded border text-xs font-semibold flex items-center justify-center gap-1 cursor-pointer ${
+                            petSpecies === spec
+                              ? 'bg-sag-blue text-white border-sag-blue shadow-3xs'
+                              : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          {spec === 'dog' ? '🐶 Perro' : spec === 'cat' ? '🐱 Gato' : '🐾 Otro'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {petSpecies === 'other' && (
+                    <div className="animate-in fade-in duration-150">
+                      <label className="block text-[10px] font-bold text-slate-600 mb-0.5">
+                        Especifique la Especie *
+                      </label>
+                      <input
+                        type="text"
+                        value={petOtherSpecies}
+                        onChange={(e) => {
+                          setPetOtherSpecies(e.target.value);
+                          setErrors((prev) => ({ ...prev, petOtherSpecies: '' }));
+                        }}
+                        placeholder="Ej: Hurón, Loro"
+                        className="w-full text-xs p-2 rounded-md border border-slate-300 focus:outline-none focus:ring-1 focus:ring-sag-blue focus:border-sag-blue bg-white"
+                      />
+                      {errors.petOtherSpecies && <p className="text-[10px] text-sag-red font-medium">{errors.petOtherSpecies}</p>}
+                    </div>
+                  )}
+
+                  {/* Vaccines */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-0.5">
+                      Tipo de Vacunas (Separadas por coma) *
+                    </label>
+                    <input
+                      type="text"
+                      value={petVaccines}
+                      onChange={(e) => {
+                        setPetVaccines(e.target.value);
+                        setErrors((prev) => ({ ...prev, petVaccines: '' }));
+                      }}
+                      placeholder="Ej: Antirrábica vigente, Óctuple, Séxtuple"
+                      className="w-full text-xs p-2 rounded-md border border-slate-300 focus:outline-none focus:ring-1 focus:ring-sag-blue focus:border-sag-blue bg-white"
+                    />
+                    <span className="text-[8.5px] text-slate-400 block mt-0.5">
+                      Para ingresar a Chile, la vacuna antirrábica es de carácter obligatorio.
+                    </span>
+                    {errors.petVaccines && <p className="text-[10px] text-sag-red font-medium">{errors.petVaccines}</p>}
+                  </div>
+
+                  {/* File upload drag and drop */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-0.5">
+                      Certificado Zoosanitario Veterinario (PDF/JPG) *
+                    </label>
+                    
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          handlePetVetDocUpload(e.target.files[0]);
+                          setErrors((prev) => ({ ...prev, petVetDoc: '' }));
+                        }
+                      }}
+                      accept=".pdf,image/jpeg,image/jpg,image/png"
+                      className="hidden"
+                    />
+
+                    <div
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      className={`border-2 border-dashed rounded-lg p-3 text-center cursor-pointer transition-all flex flex-col items-center justify-center space-y-1.5 ${
+                        isDragging
+                          ? 'border-sag-blue bg-blue-50/40'
+                          : petVetDocName
+                          ? 'border-emerald-300 bg-emerald-50/20'
+                          : 'border-slate-300 hover:border-sag-blue hover:bg-slate-50'
+                      }`}
+                    >
+                      {isUploading ? (
+                        <div className="w-full py-1.5 space-y-1">
+                          <div className="flex justify-between items-center text-[9px] font-bold text-slate-500">
+                            <span>Subiendo documento...</span>
+                            <span>{uploadProgress}%</span>
+                          </div>
+                          <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div
+                              className="bg-sag-blue h-full transition-all duration-150"
+                              style={{ width: `${uploadProgress}%` }}
+                            />
+                          </div>
+                        </div>
+                      ) : petVetDocName ? (
+                        <div className="flex flex-col items-center space-y-1">
+                          <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                            <Check className="w-4 h-4" />
+                          </div>
+                          <div className="text-center">
+                            <span className="text-[10.5px] font-bold text-slate-800 block truncate max-w-[280px]">
+                              {petVetDocName}
+                            </span>
+                            <span className="text-[8.5px] text-slate-400 block">
+                              Haga clic para cambiar el archivo
+                            </span>
+                          </div>
+                          
+                          {/* Real base64 preview if image */}
+                          {petVetDocUrl && (petVetDocName.endsWith('.jpg') || petVetDocName.endsWith('.jpeg') || petVetDocName.endsWith('.png')) && (
+                            <img
+                              src={petVetDocUrl}
+                              alt="Vista previa certificado"
+                              className="h-16 mt-1 border border-slate-200 rounded object-contain max-w-[150px] bg-white p-0.5"
+                              referrerPolicy="no-referrer"
+                            />
+                          )}
+                          {petVetDocName.endsWith('.pdf') && (
+                            <div className="flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded px-2 py-1 mt-1 text-[9.5px] font-bold text-slate-600">
+                              <FileText className="w-3.5 h-3.5 text-sag-red" />
+                              <span>Vista Previa PDF Protegida</span>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center py-1">
+                          <UploadCloud className="w-7 h-7 text-slate-400" />
+                          <p className="text-[10.5px] font-bold text-slate-600">
+                            Arrastre y suelte su certificado aquí
+                          </p>
+                          <p className="text-[8.5px] text-slate-400">
+                            o haga clic para examinar archivos (PDF, JPG, PNG)
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    {errors.petVetDoc && <p className="text-[10px] text-sag-red font-semibold mt-1">{errors.petVetDoc}</p>}
+                  </div>
+
+                  {/* Add pet button */}
+                  <button
+                    type="button"
+                    onClick={handleAddPet}
+                    className="w-full py-2 bg-sag-blue hover:bg-sag-dark text-white font-bold text-xs rounded shadow-2xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Guardar y Registrar Mascota
+                  </button>
+                </div>
+
+                {/* Registered Pets Summary Card */}
+                {pets.length > 0 && (
+                  <div className="space-y-2 pt-1 animate-in fade-in duration-200">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block border-b border-slate-200 pb-1">
+                      Fichas de Mascotas Registradas ({pets.length})
+                    </span>
+
+                    <div className="space-y-2.5">
+                      {pets.map((p) => (
+                        <div
+                          key={p.id}
+                          className="bg-white border-2 border-slate-200 rounded-xl overflow-hidden shadow-2xs flex flex-col relative"
+                        >
+                          {/* Banner Header like a credential */}
+                          <div className="bg-gradient-to-r from-sag-dark to-sag-blue text-white p-2 flex justify-between items-center">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm">🛡️</span>
+                              <div>
+                                <span className="text-[8px] uppercase font-black tracking-wider text-emerald-400 block leading-none">
+                                  SAG Control Zoosanitario
+                                </span>
+                                <span className="text-[10.5px] font-black tracking-tight uppercase">
+                                  FICHA SANITARIA DE MASCOTA
+                                </span>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPets((prev) => prev.filter((item) => item.id !== p.id));
+                              }}
+                              className="text-slate-300 hover:text-sag-red p-1 rounded hover:bg-white/10 cursor-pointer"
+                              title="Eliminar Mascota"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          {/* Pet card details */}
+                          <div className="p-2.5 grid grid-cols-3 gap-2 text-[10.5px]">
+                            <div className="col-span-2 space-y-1.5">
+                              <div>
+                                <span className="text-[8px] text-slate-400 font-extrabold uppercase block leading-none">Nombre Mascota</span>
+                                <span className="font-bold text-slate-800 text-xs">{p.name}</span>
+                              </div>
+                              <div>
+                                <span className="text-[8px] text-slate-400 font-extrabold uppercase block leading-none">Especie</span>
+                                <span className="font-bold text-slate-700">
+                                  {p.species === 'dog' ? '🐶 Perro' : p.species === 'cat' ? '🐱 Gato' : `🐾 Otro (${p.otherSpecies})`}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-[8px] text-slate-400 font-extrabold uppercase block leading-none">Vacunas Registradas</span>
+                                <span className="font-semibold text-slate-600 block leading-tight text-[10px] break-words">
+                                  {p.vaccines}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Right side barcode or QR simulation / Doc Status */}
+                            <div className="flex flex-col items-center justify-between border-l border-slate-100 pl-2">
+                              <div className="text-center space-y-1">
+                                <span className="text-[7.5px] text-slate-400 font-extrabold uppercase block leading-none">Certificado</span>
+                                <span className="inline-flex px-1.5 py-0.2 rounded-full text-[8px] font-extrabold bg-emerald-50 border border-emerald-200 text-sag-green uppercase">
+                                  ✓ Digitalizado
+                                </span>
+                              </div>
+
+                              {/* Thumbnail file preview */}
+                              {p.vetDocUrl && (p.vetDocName?.endsWith('.jpg') || p.vetDocName?.endsWith('.jpeg') || p.vetDocName?.endsWith('.png')) ? (
+                                <img
+                                  src={p.vetDocUrl}
+                                  alt="Certificado veterinario"
+                                  className="h-10 w-12 border border-slate-200 rounded object-cover bg-slate-50 mt-1"
+                                  referrerPolicy="no-referrer"
+                                />
+                              ) : (
+                                <div className="h-10 w-12 border border-slate-200 rounded flex flex-col items-center justify-center bg-slate-50 mt-1">
+                                  <FileText className="w-5 h-5 text-sag-red" />
+                                  <span className="text-[6.5px] font-bold text-slate-500 leading-none truncate max-w-[40px]">{p.vetDocName}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Stamp banner at bottom */}
+                          <div className="bg-slate-50 border-t border-slate-100 px-2.5 py-1 flex justify-between items-center text-[8.5px] font-bold text-slate-400">
+                            <span>Suscrito bajo juramento</span>
+                            <span className="text-sag-blue">Listo para inspección fronteriza</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {errors.pets && <p className="text-[10px] text-sag-red font-semibold bg-rose-50/50 p-2 rounded border border-rose-100">{errors.pets}</p>}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* STEP 5: Firma Digital y Juramento Legal */}
+      {step === 5 && (
+        <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
+          <div className="border-b border-slate-100 pb-2">
+            <h2 className="text-sm font-extrabold text-sag-dark flex items-center gap-1.5 font-display">
               <FileText className="w-4 h-4 text-sag-blue" />
-              4. Juramento de Veracidad y Firma
+              5. Juramento de Veracidad y Firma
             </h2>
             <p className="text-[11px] text-slate-500 mt-0.5 leading-tight">Su declaración tiene carácter legal bajo la normativa chilena.</p>
           </div>
@@ -713,7 +1174,7 @@ export default function DeclarationFormWizard({ onSubmit }: DeclarationFormWizar
           </button>
         )}
 
-        {step < 4 ? (
+        {step < 5 ? (
           <button
             id="wizard-btn-next"
             type="button"

@@ -216,6 +216,33 @@ export default function ReceiptView({ declaration, onBackToForm }: ReceiptViewPr
             )}
           </div>
 
+          {/* Declared Pets List inside receipt */}
+          {declaration.hasPets && declaration.pets && declaration.pets.length > 0 && (
+            <div className="bg-blue-50/40 p-2 rounded border border-blue-200/50 space-y-1 mt-1 font-sans">
+              <span className="text-[9px] font-black text-sag-dark uppercase tracking-wider block border-b border-blue-200/40 pb-0.5">
+                🐾 Mascotas Registradas ({declaration.pets.length})
+              </span>
+              <div className="space-y-1.5">
+                {declaration.pets.map((pet, idx) => (
+                  <div key={idx} className="text-[10px] space-y-0.5 border-b border-blue-100 last:border-none pb-1 last:pb-0">
+                    <div className="flex justify-between font-bold text-slate-800">
+                      <span>• {pet.name} ({pet.species === 'dog' ? '🐶 Perro' : pet.species === 'cat' ? '🐱 Gato' : `🐾 ${pet.otherSpecies || 'Otro'}`})</span>
+                      <span className="text-[8px] text-sag-blue font-extrabold uppercase">✓ Validado</span>
+                    </div>
+                    <div className="text-[8.5px] text-slate-500 font-semibold leading-tight">
+                      Vacunas: {pet.vaccines}
+                    </div>
+                    {pet.vetDocName && (
+                      <div className="text-[8px] text-slate-400 font-mono flex items-center gap-1 mt-0.5">
+                        📎 {pet.vetDocName}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Signature Rendering inside receipt */}
           {declaration.signatureDataUrl && (
             <div className="border-t border-slate-100 pt-2 flex flex-col items-center">

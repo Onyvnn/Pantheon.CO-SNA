@@ -70,6 +70,17 @@ export default function App() {
         { id: 'm2', name: 'Quesos frescos o artesanales', category: 'animal', riskLevel: 'prohibited' },
         { id: 'm3', name: 'Yerba Mate procesada y envasada', category: 'vegetal', riskLevel: 'allowed' }
       ],
+      hasPets: true,
+      pets: [
+        {
+          id: 'p1',
+          species: 'dog',
+          name: 'Coco',
+          vaccines: 'Antirrábica vigente, Óctuple al día.',
+          vetDocName: 'certificado_veterinario_coco.jpg',
+          vetDocUrl: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=200'
+        }
+      ],
       createdAt: new Date().toISOString(),
       status: 'submitted'
     };
