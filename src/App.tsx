@@ -112,7 +112,7 @@ export default function App() {
       <div className="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px] opacity-20 pointer-events-none" />
 
       {/* Main Responsive Mobile Frame Container */}
-      <div className="w-full max-w-md bg-slate-50 rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-800 flex flex-col relative min-h-[760px] max-h-[900px] overflow-y-auto">
+      <div className="w-full max-w-md bg-slate-50 rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-800 flex flex-col relative min-h-[760px] max-h-[900px]">
         
         {/* Mobile Status Bar Simulation */}
         <div className="bg-slate-950 text-[10px] text-gray-400 px-5 py-1 flex justify-between items-center font-semibold select-none">

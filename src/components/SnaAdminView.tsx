@@ -551,12 +551,10 @@ export default function SnaAdminView({ declarations }: SnaAdminViewProps) {
               // Scale heights
               const totalHeight = (data.total / maxMonthlyTotal) * 140;
               const retainedHeight = (data.retained / maxMonthlyTotal) * 140;
-              const abuseHeight = (data.reportedAbuse / maxMonthlyTotal) * 140;
 
               // Y coordinates
               const totalY = 170 - totalHeight;
               const retainedY = 170 - retainedHeight;
-              const abuseY = 170 - abuseHeight;
 
               const isHovered = hoveredBarIndex === index;
 
@@ -611,35 +609,41 @@ export default function SnaAdminView({ declarations }: SnaAdminViewProps) {
                   >
                     {data.name}
                   </text>
-
-                  {/* Hover tooltip values drawn directly inside SVG for ultimate robustness */}
-                  {isHovered && (
-                    <g>
-                      {/* Tooltip Background */}
-                      <rect
-                        x={xCenter - 50}
-                        y={Math.min(totalY - 45, 100)}
-                        width="100"
-                        height="42"
-                        fill="#0f172a"
-                        rx="5"
-                        opacity="0.95"
-                      />
-                      {/* Tooltip Text */}
-                      <text x={xCenter} y={Math.min(totalY - 33, 112)} fill="#fff" className="text-[8px] font-black" textAnchor="middle">
-                        {data.name}
-                      </text>
-                      <text x={xCenter} y={Math.min(totalY - 23, 122)} fill="#38bdf8" className="text-[7.5px] font-bold" textAnchor="middle">
-                        Flujo: {data.total} dcl.
-                      </text>
-                      <text x={xCenter} y={Math.min(totalY - 13, 132)} fill="#fbbf24" className="text-[7.5px] font-bold" textAnchor="middle">
-                        Retenido: {data.retained} ({((data.retained/data.total)*100).toFixed(0)}%)
-                      </text>
-                    </g>
-                  )}
                 </g>
               );
             })}
+
+            {/* Hover tooltip values drawn on top of ALL other elements to prevent overlapping */}
+            {hoveredBarIndex !== null && (() => {
+              const data = monthlyData[hoveredBarIndex];
+              const xCenter = 40 + (hoveredBarIndex * 72) + 20;
+              const totalHeight = (data.total / maxMonthlyTotal) * 140;
+              const totalY = 170 - totalHeight;
+              return (
+                <g className="pointer-events-none">
+                  {/* Tooltip Background */}
+                  <rect
+                    x={xCenter - 50}
+                    y={Math.min(totalY - 45, 100)}
+                    width="100"
+                    height="42"
+                    fill="#0f172a"
+                    rx="5"
+                    opacity="0.95"
+                  />
+                  {/* Tooltip Text */}
+                  <text x={xCenter} y={Math.min(totalY - 33, 112)} fill="#fff" className="text-[8px] font-black" textAnchor="middle">
+                    {data.name}
+                  </text>
+                  <text x={xCenter} y={Math.min(totalY - 23, 122)} fill="#38bdf8" className="text-[7.5px] font-bold" textAnchor="middle">
+                    Flujo: {data.total} dcl.
+                  </text>
+                  <text x={xCenter} y={Math.min(totalY - 13, 132)} fill="#fbbf24" className="text-[7.5px] font-bold" textAnchor="middle">
+                    Retenido: {data.retained} ({data.total > 0 ? ((data.retained/data.total)*100).toFixed(0) : 0}%)
+                  </text>
+                </g>
+              );
+            })()}
 
             {/* Definitions for gradients */}
             <defs>

@@ -53,7 +53,7 @@ export default function Header({ currentView, onViewChange, hasHistory }: Header
           <button
             id="nav-btn-form"
             onClick={() => onViewChange('form')}
-            className={`py-1.5 rounded text-[9.5px] font-black transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 relative ${
+            className={`py-1 rounded text-[8.5px] sm:text-[9.5px] font-black tracking-tighter sm:tracking-normal transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 relative ${
               currentView === 'form'
                 ? 'bg-white text-sag-dark shadow-xs'
                 : 'text-gray-300 hover:text-white hover:bg-white/5'
@@ -66,7 +66,7 @@ export default function Header({ currentView, onViewChange, hasHistory }: Header
           <button
             id="nav-btn-history"
             onClick={() => onViewChange('history')}
-            className={`py-1.5 rounded text-[9.5px] font-black transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 relative ${
+            className={`py-1 rounded text-[8.5px] sm:text-[9.5px] font-black tracking-tighter sm:tracking-normal transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 relative ${
               currentView === 'history'
                 ? 'bg-white text-sag-dark shadow-xs'
                 : 'text-gray-300 hover:text-white hover:bg-white/5'
@@ -82,7 +82,7 @@ export default function Header({ currentView, onViewChange, hasHistory }: Header
           <button
             id="nav-btn-info"
             onClick={() => onViewChange('info')}
-            className={`py-1.5 rounded text-[9.5px] font-black transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 relative ${
+            className={`py-1 rounded text-[8.5px] sm:text-[9.5px] font-black tracking-tighter sm:tracking-normal transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 relative ${
               currentView === 'info'
                 ? 'bg-white text-sag-dark shadow-xs'
                 : 'text-gray-300 hover:text-white hover:bg-white/5'
@@ -95,7 +95,7 @@ export default function Header({ currentView, onViewChange, hasHistory }: Header
           <button
             id="nav-btn-inspector"
             onClick={() => onViewChange('inspector')}
-            className={`py-1.5 rounded text-[9.5px] font-black transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 relative ${
+            className={`py-1 rounded text-[8.5px] sm:text-[9.5px] font-black tracking-tighter sm:tracking-normal transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 relative ${
               currentView === 'inspector'
                 ? 'bg-gradient-to-r from-red-600 to-sag-blue text-white shadow-xs'
                 : 'text-amber-400 hover:text-white hover:bg-white/5'
@@ -108,7 +108,7 @@ export default function Header({ currentView, onViewChange, hasHistory }: Header
           <button
             id="nav-btn-admin"
             onClick={() => onViewChange('admin')}
-            className={`py-1.5 rounded text-[9.5px] font-black transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 relative ${
+            className={`py-1 rounded text-[8.5px] sm:text-[9.5px] font-black tracking-tighter sm:tracking-normal transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 relative ${
               currentView === 'admin'
                 ? 'bg-gradient-to-r from-blue-600 to-emerald-600 text-white shadow-xs'
                 : 'text-emerald-400 hover:text-white hover:bg-white/5'
