@@ -2,8 +2,8 @@ import React from 'react';
 import { Shield, Smartphone, FileCheck, History, Info } from 'lucide-react';
 
 interface HeaderProps {
-  currentView: 'form' | 'history' | 'info';
-  onViewChange: (view: 'form' | 'history' | 'info') => void;
+  currentView: 'form' | 'history' | 'info' | 'inspector';
+  onViewChange: (view: 'form' | 'history' | 'info' | 'inspector') => void;
   hasHistory: boolean;
 }
 
@@ -17,37 +17,43 @@ export default function Header({ currentView, onViewChange, hasHistory }: Header
         <div className="w-1/3 bg-sag-red"></div>
       </div>
 
-      <div className="px-4 py-3 max-w-md mx-auto flex items-center justify-between">
-        {/* Left: Chilean Government Shield Style */}
-        <div className="flex items-center space-x-2.5">
-          <div className="bg-white p-1 rounded-sm shadow-sm flex items-center justify-center">
-            {/* Simple CSS Chilean Flag / Shield Representation */}
-            <div className="w-6 h-6 flex flex-col relative overflow-hidden border border-gray-200">
-              <div className="h-1/2 flex w-full">
-                <div className="w-1/2 bg-sag-blue flex items-center justify-center">
-                  <span className="text-[6px] text-white font-bold">★</span>
+      <div className="px-3 py-2.5 max-w-md mx-auto flex flex-col gap-2.5">
+        {/* Top row: Flag/Shield & Title */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="bg-white p-1 rounded-sm shadow-sm flex items-center justify-center">
+              {/* Simple CSS Chilean Flag / Shield Representation */}
+              <div className="w-6 h-6 flex flex-col relative overflow-hidden border border-gray-200">
+                <div className="h-1/2 flex w-full">
+                  <div className="w-1/2 bg-sag-blue flex items-center justify-center">
+                    <span className="text-[6px] text-white font-bold">★</span>
+                  </div>
+                  <div className="w-1/2 bg-white"></div>
                 </div>
-                <div className="w-1/2 bg-white"></div>
+                <div className="h-1/2 bg-sag-red w-full"></div>
               </div>
-              <div className="h-1/2 bg-sag-red w-full"></div>
+            </div>
+            <div>
+              <div className="text-[9px] uppercase tracking-wider font-semibold text-gray-300 leading-none">
+                Gobierno de Chile
+              </div>
+              <h1 className="text-xs font-bold tracking-tight text-white flex items-center gap-1 mt-0.5">
+                SAG <span className="font-normal text-[10.5px] text-emerald-400">| Declaración Digital</span>
+              </h1>
             </div>
           </div>
-          <div>
-            <div className="text-[10px] uppercase tracking-wider font-semibold text-gray-300 leading-none">
-              Gobierno de Chile
-            </div>
-            <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-1">
-              SAG <span className="font-normal text-xs text-emerald-400">| Declaración Digital</span>
-            </h1>
+          
+          <div className="bg-slate-900/80 px-2 py-0.5 rounded text-[8px] font-black uppercase text-emerald-400 tracking-wider border border-slate-700">
+            Frontera Terrestre
           </div>
         </div>
 
-        {/* Right: Quick Navigation Tabs for Mobile App Feel */}
-        <nav className="flex items-center gap-1 bg-white/5 p-1 rounded-lg border border-white/10" id="main-nav">
+        {/* Bottom row: Navigation tabs adjusted for 4 options */}
+        <nav className="grid grid-cols-4 gap-0.5 bg-white/5 p-0.5 rounded-lg border border-white/10" id="main-nav">
           <button
             id="nav-btn-form"
             onClick={() => onViewChange('form')}
-            className={`px-2.5 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1 relative ${
+            className={`py-1.5 rounded text-[9.5px] font-black transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 relative ${
               currentView === 'form'
                 ? 'bg-white text-sag-dark shadow-xs'
                 : 'text-gray-300 hover:text-white hover:bg-white/5'
@@ -60,7 +66,7 @@ export default function Header({ currentView, onViewChange, hasHistory }: Header
           <button
             id="nav-btn-history"
             onClick={() => onViewChange('history')}
-            className={`px-2.5 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1 relative ${
+            className={`py-1.5 rounded text-[9.5px] font-black transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 relative ${
               currentView === 'history'
                 ? 'bg-white text-sag-dark shadow-xs'
                 : 'text-gray-300 hover:text-white hover:bg-white/5'
@@ -69,14 +75,14 @@ export default function Header({ currentView, onViewChange, hasHistory }: Header
             <History className="w-3.5 h-3.5" />
             <span>Historial</span>
             {hasHistory && (
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-sag-red rounded-full ring-2 ring-sag-dark"></span>
+              <span className="absolute top-1 right-2 w-1.5 h-1.5 bg-sag-red rounded-full ring-1 ring-sag-dark"></span>
             )}
           </button>
 
           <button
             id="nav-btn-info"
             onClick={() => onViewChange('info')}
-            className={`px-2.5 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1 relative ${
+            className={`py-1.5 rounded text-[9.5px] font-black transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 relative ${
               currentView === 'info'
                 ? 'bg-white text-sag-dark shadow-xs'
                 : 'text-gray-300 hover:text-white hover:bg-white/5'
@@ -84,6 +90,19 @@ export default function Header({ currentView, onViewChange, hasHistory }: Header
           >
             <Info className="w-3.5 h-3.5" />
             <span>Guía</span>
+          </button>
+
+          <button
+            id="nav-btn-inspector"
+            onClick={() => onViewChange('inspector')}
+            className={`py-1.5 rounded text-[9.5px] font-black transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 relative ${
+              currentView === 'inspector'
+                ? 'bg-gradient-to-r from-red-600 to-sag-blue text-white shadow-xs'
+                : 'text-amber-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Shield className="w-3.5 h-3.5" />
+            <span>Inspector</span>
           </button>
         </nav>
       </div>

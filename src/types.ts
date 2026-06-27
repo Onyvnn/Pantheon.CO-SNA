@@ -50,6 +50,15 @@ export interface Declaration {
   signatureDataUrl?: string; // Digital signature
   createdAt: string;
   status: 'draft' | 'submitted' | 'inspected';
+  inspectionOutcome?: 'approved' | 'retained' | 'reported_abuse';
+  inspectionNotes?: string;
+  inspectionDate?: string;
+  abuseReport?: {
+    description: string;
+    evidenceName?: string;
+    evidenceUrl?: string; // Data URL of photograph
+    createdAt: string;
+  };
 }
 
 export interface BorderCrossing {

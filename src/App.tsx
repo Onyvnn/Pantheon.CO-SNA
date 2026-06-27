@@ -7,9 +7,10 @@ import DeclarationFormWizard from './components/DeclarationFormWizard';
 import ReceiptView from './components/ReceiptView';
 import HistoryView from './components/HistoryView';
 import InfoView from './components/InfoView';
+import InspectorView from './components/InspectorView';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'form' | 'history' | 'info'>('form');
+  const [currentView, setCurrentView] = useState<'form' | 'history' | 'info' | 'inspector'>('form');
   const [declarations, setDeclarations] = useState<Declaration[]>([]);
   const [selectedDeclaration, setSelectedDeclaration] = useState<Declaration | null>(null);
 
@@ -41,6 +42,15 @@ export default function App() {
     saveDeclarations(updated);
     setSelectedDeclaration(newDeclaration);
     // Smooth transition to receipt screen
+  };
+
+  // Update handler for Inspector decisions
+  const handleUpdateDeclaration = (updated: Declaration) => {
+    const updatedDecs = declarations.map(d => d.id === updated.id ? updated : d);
+    saveDeclarations(updatedDecs);
+    if (selectedDeclaration && selectedDeclaration.id === updated.id) {
+      setSelectedDeclaration(updated);
+    }
   };
 
   // Delete handler
@@ -195,7 +205,7 @@ export default function App() {
                   onStartNew={handleStartNew}
                 />
               </motion.div>
-            ) : (
+            ) : currentView === 'info' ? (
               // Rules Info Help View
               <motion.div
                 key="info"
@@ -205,6 +215,20 @@ export default function App() {
                 transition={{ duration: 0.25 }}
               >
                 <InfoView />
+              </motion.div>
+            ) : (
+              // Inspector View
+              <motion.div
+                key="inspector"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.25 }}
+              >
+                <InspectorView
+                  declarations={declarations}
+                  onUpdateDeclaration={handleUpdateDeclaration}
+                />
               </motion.div>
             )}
           </AnimatePresence>
