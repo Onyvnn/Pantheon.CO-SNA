@@ -8,9 +8,10 @@ import ReceiptView from './components/ReceiptView';
 import HistoryView from './components/HistoryView';
 import InfoView from './components/InfoView';
 import InspectorView from './components/InspectorView';
+import SnaAdminView from './components/SnaAdminView';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'form' | 'history' | 'info' | 'inspector'>('form');
+  const [currentView, setCurrentView] = useState<'form' | 'history' | 'info' | 'inspector' | 'admin'>('form');
   const [declarations, setDeclarations] = useState<Declaration[]>([]);
   const [selectedDeclaration, setSelectedDeclaration] = useState<Declaration | null>(null);
 
@@ -216,7 +217,7 @@ export default function App() {
               >
                 <InfoView />
               </motion.div>
-            ) : (
+            ) : currentView === 'inspector' ? (
               // Inspector View
               <motion.div
                 key="inspector"
@@ -228,6 +229,19 @@ export default function App() {
                 <InspectorView
                   declarations={declarations}
                   onUpdateDeclaration={handleUpdateDeclaration}
+                />
+              </motion.div>
+            ) : (
+              // SNA Admin View
+              <motion.div
+                key="admin"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.25 }}
+              >
+                <SnaAdminView
+                  declarations={declarations}
                 />
               </motion.div>
             )}

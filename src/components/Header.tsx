@@ -1,9 +1,9 @@
 import React from 'react';
-import { Shield, Smartphone, FileCheck, History, Info } from 'lucide-react';
+import { Shield, Smartphone, FileCheck, History, Info, BarChart3 } from 'lucide-react';
 
 interface HeaderProps {
-  currentView: 'form' | 'history' | 'info' | 'inspector';
-  onViewChange: (view: 'form' | 'history' | 'info' | 'inspector') => void;
+  currentView: 'form' | 'history' | 'info' | 'inspector' | 'admin';
+  onViewChange: (view: 'form' | 'history' | 'info' | 'inspector' | 'admin') => void;
   hasHistory: boolean;
 }
 
@@ -48,8 +48,8 @@ export default function Header({ currentView, onViewChange, hasHistory }: Header
           </div>
         </div>
 
-        {/* Bottom row: Navigation tabs adjusted for 4 options */}
-        <nav className="grid grid-cols-4 gap-0.5 bg-white/5 p-0.5 rounded-lg border border-white/10" id="main-nav">
+        {/* Bottom row: Navigation tabs adjusted for 5 options */}
+        <nav className="grid grid-cols-5 gap-0.5 bg-white/5 p-0.5 rounded-lg border border-white/10" id="main-nav">
           <button
             id="nav-btn-form"
             onClick={() => onViewChange('form')}
@@ -103,6 +103,19 @@ export default function Header({ currentView, onViewChange, hasHistory }: Header
           >
             <Shield className="w-3.5 h-3.5" />
             <span>Inspector</span>
+          </button>
+
+          <button
+            id="nav-btn-admin"
+            onClick={() => onViewChange('admin')}
+            className={`py-1.5 rounded text-[9.5px] font-black transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 relative ${
+              currentView === 'admin'
+                ? 'bg-gradient-to-r from-blue-600 to-emerald-600 text-white shadow-xs'
+                : 'text-emerald-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>Reportes</span>
           </button>
         </nav>
       </div>
